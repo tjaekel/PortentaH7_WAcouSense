@@ -10,8 +10,9 @@ This project is __not__ an _Arduino/mbed sketch_. It is native C-code (not C++),
 
 ## HW Requirements
 - Portenta H7 MCU module
-- Portenta H7 VisionShield or Breakout Board: using ETH connection and PDM MICs on board
-- (optional) Breakout Board: using ETH and USB-A connection
+- Portenta H7 VisionShield or Breakout Board: using ETH connection and PDM MICs on this board
+- (optional) Breakout Board: using ETH, PDM MICs, IMU and USB-A connection
+- with Breakout Board: add Adafruit PDM MIC ("Adafruit PDM MEMS") and IMU as "Adafruit LSM9DS1" (via flying wires)
 
 ## Features of the project
 - it provides a UART shell via the USB-C connection, see "help" command there
@@ -24,7 +25,7 @@ This project is __not__ an _Arduino/mbed sketch_. It is native C-code (not C++),
 - QSPI flash: used for man pages
 - SPI and I2C peripherals
 - USB-A on Breakout Board (for Audio, prepared for USB as external memory device, a second VCP UART)
-- PDM MIC(s) on Breakout board (or on Vision Shield)
+- PDM MIC(s) on Breakout board (or on Vision Shield) - use Pico-C to initialize and read IMU data (wwithout any C-compiler needed)
 - send PDM MIC audio via VBAN to a host PC
 
 ## Full Open Source
@@ -36,3 +37,5 @@ Possible also to keep the Bootloader and flash MCU FW via command line.
 
 See the Linker Script if with Arduino Bootloader (to flash FW)) or without (ST-LINK adaopter on Breakout Board is needed). See README.txt in BIN directrory (providing the CM7 FW file, CM4 is not used yet).
 
+## Pico-C integrated
+A C-code interpreter, no need to compile: enter C-code on UART command line or write C-code scripts, stored and read from SD card. Very convenient to extend system by writing C-programs without any compiler needed or to re-flash the MCU
