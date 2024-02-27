@@ -50,7 +50,9 @@ tCFGparams GSysCfgDefault = {
 
 void SYSCFG_Init(void)
 {
-	//make we sure have just 32 registers in RTC
+	//make we sure have just 32 registers in RTC - but BKP_DR0 and BLK_DR7 are used by Arduino bootloader
+	RTC->BKP0R = 0x0;			//clear magic
+	RTC->BKP7R = 0x0;			//clear SEL
 
 	/* check if we have key in RTC BKP0R - if so, copy back from there */
 	if (RTC_START_BKP_REG == CFG_KEY_VALID)

@@ -54,6 +54,8 @@ ECMD_DEC_Status CMD_ipaddr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_syscfg(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_setcfg(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_syserr(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_dumpm(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_bootld(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_pmicr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_pmicw(TCMD_DEC_Results *res, EResultOut out);
@@ -191,6 +193,18 @@ const TCMD_DEC_Command Commands[] = {
 				.help = (const char *)"set or clear debug flags [value]",
 				.func = CMD_debug,
 				.manPage = 9,
+		},
+		{
+				.cmd = (const char *)"dumpm",
+				.help = (const char *)"display MCU memory <addr> <bytes> [mode]",
+				.func = CMD_dumpm,
+				.manPage = 9,			/* update! */
+		},
+		{
+				.cmd = (const char *)"bootld",
+				.help = (const char *)"activate bootloader",
+				.func = CMD_bootld,
+				.manPage = 9,			/* update! */
 		},
 		{
 				.cmd = (const char *)"usr",
@@ -1220,6 +1234,25 @@ ECMD_DEC_Status CMD_debug(TCMD_DEC_Results *res, EResultOut out)
 	(void)out;
 
 	GDebug = res->val[0];
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_dumpm(TCMD_DEC_Results *res, EResultOut out)
+{
+	hex_dump((uint8_t *)res->val[0], (uint16_t)res->val[1], (int)res->val[2], out);
+
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_bootld(TCMD_DEC_Results *res, EResultOut out)
+{
+	(void)out;
+	(void)res;
+
+	RTC->BKP0R = 0x0000DF59;
+	RTC->BKP7R = 0x00000001;
+	NVIC_SystemReset();
+
 	return CMD_DEC_OK;
 }
 
