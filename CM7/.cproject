@@ -74,10 +74,16 @@
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc"/>
 									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/LwIP/src/include"/>
 									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/LwIP/system"/>
-									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/FatFs/src"/>
+									<listOptionValue builtIn="false" value="../Core/BSP"/>
 									<listOptionValue builtIn="false" value="../Core/BSP/Components/lan8742"/>
+									<listOptionValue builtIn="false" value="../Core/BSP/Components/vl53l5cx"/>
+									<listOptionValue builtIn="false" value="../Core/BSP/Components/vl53l5cx/modules"/>
+									<listOptionValue builtIn="false" value="../Core/BSP/Components/vl53l5cx/porting"/>
+									<listOptionValue builtIn="false" value="../Core/BSP/Components/53L5A1"/>
+									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/FatFs/src"/>
 									<listOptionValue builtIn="false" value="../Core/picoc/inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/VisionShield"/>
+									<listOptionValue builtIn="false" value="../../CM7/TOF_53L5A1"/>
 									<listOptionValue builtIn="false" value="../../CM7/USB_A"/>
 									<listOptionValue builtIn="false" value="../../CM7/power_mngt"/>
 								</option>
@@ -146,6 +152,7 @@
 						<entry excluding="BSP/Components/mt25tl01g|Inc/fsdata_custom.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="power_mngt"/>
@@ -246,6 +253,7 @@
 						<entry excluding="BSP/Components/mt25tl01g|Inc/fsdata_custom.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="power_mngt"/>

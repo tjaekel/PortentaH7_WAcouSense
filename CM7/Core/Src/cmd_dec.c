@@ -24,6 +24,7 @@
 #include "PDM_MIC.h"
 #include "PWM_servo.h"
 #include "power_mngt.h"
+#include "app_tof.h"
 
 #include "usbd_main.h"
 
@@ -86,6 +87,8 @@ ECMD_DEC_Status CMD_i2cwr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_i2c2rr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_i2c2wr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_i2cclk(TCMD_DEC_Results *res, EResultOut out);
+
+ECMD_DEC_Status CMD_tofc(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_cgpio(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_pgpio(TCMD_DEC_Results *res, EResultOut out);
@@ -554,6 +557,12 @@ const TCMD_DEC_Command Commands[] = {
 				.cmd = (const char *)"pwr",
 				.help = (const char *)"set <num> for power mode",
 				.func = CMD_pwr,
+				.manPage = 63,		//FIX it
+		},
+		{
+				.cmd = (const char *)"tofc",
+				.help = (const char *)"initialize and start TOF sensor",
+				.func = CMD_tofc,
 				.manPage = 63,		//FIX it
 		},
 #ifdef UART_TEST
@@ -2626,6 +2635,17 @@ ECMD_DEC_Status CMD_sservo(TCMD_DEC_Results *res, EResultOut out)
 ECMD_DEC_Status CMD_pwr(TCMD_DEC_Results *res, EResultOut out)
 {
 	PWR_Set((int)res->val[0]);
+
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_tofc(TCMD_DEC_Results *res, EResultOut out)
+{
+	MX_TOF_Init();
+	while (1)
+	{
+		MX_TOF_Process();
+	}
 
 	return CMD_DEC_OK;
 }
