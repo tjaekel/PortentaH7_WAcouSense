@@ -378,17 +378,22 @@ int32_t TOF_I2C_WriteReg_Func(uint16_t DevAddr, uint16_t Reg, uint8_t *pData, ui
 {
 	  int32_t ret = BSP_ERROR_NONE;
 
-	  if (HAL_I2C_Mem_Write(&hi2c3, DevAddr, Reg, I2C_MEMADD_SIZE_16BIT, pData, Length, USER_I2C_TIMEOUT) != HAL_OK)
+	  if (osSemaphoreAcquire(xSemaphoreI2C, portMAX_DELAY /*1000*/) == osOK)
 	  {
-	    if (HAL_I2C_GetError(&hi2c3) == HAL_I2C_ERROR_AF)
-	    {
-	      ret = BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE;
-	    }
-	    else
-	    {
-	      ret =  BSP_ERROR_PERIPH_FAILURE;
-	    }
+		  if (HAL_I2C_Mem_Write(&hi2c3, DevAddr, Reg, I2C_MEMADD_SIZE_16BIT, pData, Length, USER_I2C_TIMEOUT) != HAL_OK)
+		  {
+			  if (HAL_I2C_GetError(&hi2c3) == HAL_I2C_ERROR_AF)
+			  {
+				  ret = BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE;
+			  }
+			  else
+			  {
+				  ret =  BSP_ERROR_PERIPH_FAILURE;
+			  }
+		  }
+		  osSemaphoreRelease(xSemaphoreI2C);
 	  }
+
 	  return ret;
 }
 
@@ -396,16 +401,21 @@ int32_t TOF_I2C_ReadReg_Func(uint16_t DevAddr, uint16_t Reg, uint8_t *pData, uin
 {
 	  int32_t ret = BSP_ERROR_NONE;
 
-	  if (HAL_I2C_Mem_Read(&hi2c3, DevAddr, Reg, I2C_MEMADD_SIZE_16BIT, pData, Length, USER_I2C_TIMEOUT) != HAL_OK)
+	  if (osSemaphoreAcquire(xSemaphoreI2C, portMAX_DELAY /*1000*/) == osOK)
 	  {
-	    if (HAL_I2C_GetError(&hi2c3) != HAL_I2C_ERROR_AF)
-	    {
-	      ret =  BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE;
-	    }
-	    else
-	    {
-	      ret =  BSP_ERROR_PERIPH_FAILURE;
-	    }
+		  if (HAL_I2C_Mem_Read(&hi2c3, DevAddr, Reg, I2C_MEMADD_SIZE_16BIT, pData, Length, USER_I2C_TIMEOUT) != HAL_OK)
+		  {
+			  if (HAL_I2C_GetError(&hi2c3) != HAL_I2C_ERROR_AF)
+			  {
+				  ret =  BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE;
+			  }
+			  else
+			  {
+				  ret =  BSP_ERROR_PERIPH_FAILURE;
+			  }
+		  }
+		  osSemaphoreRelease(xSemaphoreI2C);
 	  }
+
 	  return ret;
 }

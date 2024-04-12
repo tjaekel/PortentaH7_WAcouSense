@@ -89,6 +89,7 @@ ECMD_DEC_Status CMD_i2c2wr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_i2cclk(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_tofc(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_tofp(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_cgpio(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_pgpio(TCMD_DEC_Results *res, EResultOut out);
@@ -560,9 +561,19 @@ const TCMD_DEC_Command Commands[] = {
 				.manPage = 63,		//FIX it
 		},
 		{
+				.help = (const char*)"SENSORS:",
+				.sepLine = 1,
+		},
+		{
 				.cmd = (const char *)"tofc",
-				.help = (const char *)"initialize and start TOF sensor",
+				.help = (const char *)"initialize and start TOF sensor, [-i] endless on UART",
 				.func = CMD_tofc,
+				.manPage = 63,		//FIX it
+		},
+		{
+				.cmd = (const char *)"tofp",
+				.help = (const char *)"toggle size and ambient [0|1] [0|1]",
+				.func = CMD_tofp,
 				.manPage = 63,		//FIX it
 		},
 #ifdef UART_TEST
@@ -2642,10 +2653,32 @@ ECMD_DEC_Status CMD_pwr(TCMD_DEC_Results *res, EResultOut out)
 ECMD_DEC_Status CMD_tofc(TCMD_DEC_Results *res, EResultOut out)
 {
 	MX_TOF_Init();
-	while (1)
+
+	if (strncmp(res->opt, "-i", 2) == 0)
 	{
+		/* endless on UART */
 		MX_TOF_Process();
 	}
+	else
+	{
+		/* release TOF thread, sending via network */
+		extern void ReleaseTOFTask(void);
+		ReleaseTOFTask();
+	}
+
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_tofp(TCMD_DEC_Results *res, EResultOut out)
+{
+	(void)out;
+	extern void toggle_resolution(void);
+	extern void toggle_signal_and_ambient(void);
+
+	if (res->val[0])
+		toggle_resolution();
+	if (res->val[1])
+		toggle_signal_and_ambient();
 
 	return CMD_DEC_OK;
 }

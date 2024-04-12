@@ -632,4 +632,29 @@ int __attribute__((section(".itcmram"))) SendUDP(const unsigned char *b, unsigne
 	return -100;		/* special, to separate from err codes */
 }
 
+int __attribute__((section(".itcmram"))) SendTOFUDP(const unsigned char *b, unsigned int len)
+{
+	err_t err;
+	struct netbuf *nb;
+	if (udpIPdest.addr != 0)
+	{
+		SCB_CleanDCache_by_Addr((uint32_t *)b, (int32_t)(((len + 32)/32) * 32));
+
+		nb = netbuf_new();
+		netbuf_ref(nb, b, len /*+ 1*/);
+
+		err = netconn_sendto(connUDP, nb, &udpIPdest, 8080);
+		if (err != ERR_OK)
+		{
+		}
+
+		HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_6);
+
+		netbuf_delete(nb);
+
+		return (int)err;
+	}
+	return -100;		/* special, to separate from err codes */
+}
+
 #endif

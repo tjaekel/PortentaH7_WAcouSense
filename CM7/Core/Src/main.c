@@ -82,7 +82,15 @@ const osThreadAttr_t GPIOINT_attributes = {
   .priority = (osPriority_t) osPriorityNormal
 };
 
+osThreadId_t TOFHandle;
+const osThreadAttr_t TOFThread_attributes = {
+  .name = "TOFThread",
+  .stack_size = 256 * 4,						//XXXX !!
+  .priority = (osPriority_t) osPriorityNormal
+};
+
 osSemaphoreId xSemaphoreGPIOINT   = NULL;
+osSemaphoreId xSemaphoreTOF		  = NULL;
 
 static void MX_GPIO_Init(void);
 static void MPU_Config(void);
@@ -91,6 +99,7 @@ void StartDefaultTask(void *argument);
 void StartUARTTask(void *argument);
 void StartThread(void *argument);
 void GPIOINTTask(void *argument);
+extern void StartTOFTask(void *argument);		//TOF sensor thread
 
 /**
   * @brief  The application entry point.
@@ -211,12 +220,14 @@ int main(void)
    osKernelInitialize();
 
    xSemaphoreGPIOINT   = osSemaphoreNew(1, 0, NULL);
+   xSemaphoreTOF	   = osSemaphoreNew(1, 0, NULL);
 
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
   /* add threads, ... */
   UARTTaskHandle = osThreadNew(StartUARTTask, NULL, &UARTTask_attributes);
   GPIOINTHandle  = osThreadNew(GPIOINTTask, NULL, &GPIOINT_attributes);
+  TOFHandle  	 = osThreadNew(StartTOFTask, NULL, &TOFThread_attributes);
 
   if (HTTPD_OutInit())
 	  /* Init thread for network - terminates itself */

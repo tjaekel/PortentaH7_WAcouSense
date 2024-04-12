@@ -31,7 +31,10 @@ extern "C" {
 #include "app_tof_pin_conf.h"
 ////#include "stm32l4xx_nucleo.h"
 
+#include "cmsis_os.h"
 #include "VCP_UART.h"
+
+extern osSemaphoreId xSemaphoreTOF;
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -46,18 +49,20 @@ static RANGING_SENSOR_ProfileConfig_t Profile;
 static RANGING_SENSOR_Result_t Result;
 
 static int32_t status = 0;
+#if 0
 static volatile uint8_t PushButtonDetected = 0;
 volatile uint8_t ToF_EventDetected = 0;
+#endif
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_53L5A1_SimpleRanging_Init(void);
 static void MX_53L5A1_SimpleRanging_Process(void);
 static void print_result(RANGING_SENSOR_Result_t *Result);
-static void toggle_resolution(void);
-static void toggle_signal_and_ambient(void);
+void toggle_resolution(void);
+void toggle_signal_and_ambient(void);
 static void clear_screen(void);
 static void display_commands_banner(void);
-static void handle_cmd(uint8_t cmd);
+static int  handle_cmd(uint8_t cmd);
 static uint8_t get_key(void);
 static uint32_t com_has_data(void);
 
@@ -72,6 +77,77 @@ void MX_TOF_Init(void)
 void MX_TOF_Process(void)
 {
   MX_53L5A1_SimpleRanging_Process();
+}
+
+static volatile int sTOFTaskRunning = 0;
+
+void ReleaseTOFTask(void)
+{
+	sTOFTaskRunning = 1;
+	osSemaphoreRelease(xSemaphoreTOF);
+}
+
+void PauseTOFTask(void)
+{
+	sTOFTaskRunning = 0;
+}
+
+unsigned char TOFdataBuffer[100];
+
+void StartTOFTask(void *argument)
+{
+	extern int SendTOFUDP(const unsigned char *b, unsigned int len);
+	(void)argument;
+
+	uint32_t Id;
+
+	for(;;)
+	{
+		/* wait for release */
+		if (osSemaphoreAcquire(xSemaphoreTOF, portMAX_DELAY) == osOK)
+		{
+			VL53L5A1_RANGING_SENSOR_ReadID(VL53L5A1_DEV_CENTER, &Id);
+			VL53L5A1_RANGING_SENSOR_GetCapabilities(VL53L5A1_DEV_CENTER, &Cap);
+
+			Profile.RangingProfile = RS_PROFILE_4x4_CONTINUOUS;
+			Profile.TimingBudget = TIMING_BUDGET;
+			Profile.Frequency = RANGING_FREQUENCY; /* Ranging frequency Hz (shall be consistent with TimingBudget value) */
+			Profile.EnableAmbient = 0; /* Enable: 1, Disable: 0 */
+			Profile.EnableSignal = 0; /* Enable: 1, Disable: 0 */
+
+			/* set the profile if different from default one */
+			VL53L5A1_RANGING_SENSOR_ConfigProfile(VL53L5A1_DEV_CENTER, &Profile);
+
+			status = VL53L5A1_RANGING_SENSOR_Start(VL53L5A1_DEV_CENTER, RS_MODE_BLOCKING_CONTINUOUS);
+
+			if (status != BSP_ERROR_NONE)
+			{
+				print_log(UART_OUT, "VL53L5A1_RANGING_SENSOR_Start failed\r\n");
+				osThreadTerminate(osThreadGetId());
+				return;
+			}
+
+			/* Infinite loop */
+			for(;;)
+			{
+				if ( ! sTOFTaskRunning)
+				{
+					VL53L5A1_RANGING_SENSOR_Stop(VL53L5A1_DEV_CENTER);
+					break;
+				}
+
+			    status = VL53L5A1_RANGING_SENSOR_GetDistance(VL53L5A1_DEV_CENTER, &Result);
+
+			    if (status == BSP_ERROR_NONE)
+			    {
+			    	/* do the data processing and send via network */
+			    	SendTOFUDP((unsigned char *)&Result, sizeof(Result));
+			    }
+
+				osDelay(POLLING_PERIOD);
+			}
+		}
+	}
 }
 
 /* ----------------------------- static ---------------------------------------*/
@@ -117,7 +193,8 @@ static void MX_53L5A1_SimpleRanging_Process(void)
   if (status != BSP_ERROR_NONE)
   {
     print_log(UART_OUT, "VL53L5A1_RANGING_SENSOR_Start failed\r\n");
-    while (1);
+    ////while (1);
+    return;
   }
 
   while (1)
@@ -132,7 +209,8 @@ static void MX_53L5A1_SimpleRanging_Process(void)
 
     if (com_has_data())
     {
-      handle_cmd(get_key());
+      if (handle_cmd(get_key()))
+    	  break;
     }
 
     HAL_Delay(POLLING_PERIOD);
@@ -228,7 +306,7 @@ static void print_result(RANGING_SENSOR_Result_t *Result)
   print_log(UART_OUT, "\r\n");
 }
 
-static void toggle_resolution(void)
+void toggle_resolution(void)
 {
   VL53L5A1_RANGING_SENSOR_Stop(VL53L5A1_DEV_CENTER);
 
@@ -258,7 +336,7 @@ static void toggle_resolution(void)
   VL53L5A1_RANGING_SENSOR_Start(VL53L5A1_DEV_CENTER, RS_MODE_BLOCKING_CONTINUOUS);
 }
 
-static void toggle_signal_and_ambient(void)
+void toggle_signal_and_ambient(void)
 {
   VL53L5A1_RANGING_SENSOR_Stop(VL53L5A1_DEV_CENTER);
 
@@ -279,17 +357,18 @@ static void display_commands_banner(void)
   /* clear screen */
   print_log(UART_OUT, "\033[2J\033[H");
 
-  print_log(UART_OUT, "53L5A1 Simple Ranging demo application\r\n");
-  print_log(UART_OUT, "--------------------------------------\r\n\n");
+  print_log(UART_OUT, "53L5A1 Simple Ranging\r\n");
+  print_log(UART_OUT, "---------------------\r\n\n");
 
-  print_log(UART_OUT, "Use the following keys to control application\r\n");
-  print_log(UART_OUT, " 'r' : change resolution\r\n");
+  print_log(UART_OUT, "control keys:\r\n");
+  print_log(UART_OUT, " 'r' : toggle resolution\r\n");
   print_log(UART_OUT, " 's' : enable signal and ambient\r\n");
   print_log(UART_OUT, " 'c' : clear screen\r\n");
+  print_log(UART_OUT, " 'x' : exit from endless loop\r\n");
   print_log(UART_OUT, "\r\n");
 }
 
-static void handle_cmd(uint8_t cmd)
+static int handle_cmd(uint8_t cmd)
 {
   switch (cmd)
   {
@@ -307,9 +386,14 @@ static void handle_cmd(uint8_t cmd)
       clear_screen();
       break;
 
+    case 'x':
+    	return 1;	//stop endless loop
+    	break;
+
     default:
       break;
   }
+  return 0;
 }
 
 static uint8_t get_key(void)
