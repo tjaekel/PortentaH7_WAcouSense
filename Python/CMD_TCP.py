@@ -13,7 +13,7 @@ import time
 isDHCPUsed = False
 
 #the STATIC IP address if DHCP is not used
-defaultHostIPaddress = "192.168.1.204"
+defaultHostIPaddress = "192.168.0.153"
 
 if isDHCPUsed == True:
     #we can resolve IP address by name via NETBIOS - define the MCU hostname

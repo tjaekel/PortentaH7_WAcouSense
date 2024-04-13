@@ -1,1 +1,1 @@
-Find here some documents how to setup (HW, SW, GuideLines...)
+Find here some documents how to setup (HW, SW, GuideLines, PicoC...)

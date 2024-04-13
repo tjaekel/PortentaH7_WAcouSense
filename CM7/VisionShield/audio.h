@@ -10,6 +10,16 @@
 #define AUDIO_SAI_NBR_CHANNELS      (2) // Default number of channels.
 
 #if defined(TARGET_PORTENTA_H7)
+#if 0
+/* PC2, PC3 is DFSDM1_CKOUT1 and DFSDM1_DATAIN1 */
+#define AUDIO_SAI_CK_PORT           (GPIOC)
+#define AUDIO_SAI_CK_PIN            (GPIO_PIN_2)
+#define AUDIO_SAI_CK_AF             (GPIO_AF10_SAI4)
+
+#define AUDIO_SAI_D1_PORT           (GPIOC)
+#define AUDIO_SAI_D1_PIN            (GPIO_PIN_3)
+#define AUDIO_SAI_D1_AF             (GPIO_AF10_SAI4)
+#else
 #define AUDIO_SAI_CK_PORT           (GPIOE)
 #define AUDIO_SAI_CK_PIN            (GPIO_PIN_2)
 #define AUDIO_SAI_CK_AF             (GPIO_AF10_SAI4)
@@ -17,6 +27,7 @@
 #define AUDIO_SAI_D1_PORT           (GPIOB)
 #define AUDIO_SAI_D1_PIN            (GPIO_PIN_2)
 #define AUDIO_SAI_D1_AF             (GPIO_AF10_SAI4)
+#endif
 #endif
 
 #define AUDIO_SAI_DMA_STREAM        BDMA_Channel1
