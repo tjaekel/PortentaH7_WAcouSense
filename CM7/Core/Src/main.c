@@ -92,8 +92,11 @@ const osThreadAttr_t TOFThread_attributes = {
 osSemaphoreId xSemaphoreGPIOINT   = NULL;
 osSemaphoreId xSemaphoreTOF		  = NULL;
 
+CRC_HandleTypeDef hcrc;
+
 static void MX_GPIO_Init(void);
 static void MPU_Config(void);
+static void MX_CRC_Init(void);
 
 void StartDefaultTask(void *argument);
 void StartUARTTask(void *argument);
@@ -215,6 +218,7 @@ int main(void)
 #endif
 
   ADC3_Init();
+  MX_CRC_Init();
 
   /* Initialize RTOS scheduler */
    osKernelInitialize();
@@ -442,6 +446,21 @@ static void MX_GPIO_Init(void)
   	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   	GPIO_InitStruct.Pin = GPIO_PIN_3;
   	HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+}
+
+static void MX_CRC_Init(void)
+{
+  hcrc.Instance = CRC;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    ////Error_Handler();
+  }
+  __HAL_CRC_DR_RESET(&hcrc);
 }
 
 /**

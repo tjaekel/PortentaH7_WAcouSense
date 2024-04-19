@@ -30,8 +30,8 @@ static DMA_HandleTypeDef hdma_sai_rx;
 
 static int g_i_channels = AUDIO_SAI_NBR_CHANNELS;
 static int g_o_channels = AUDIO_SAI_NBR_CHANNELS;
-static PDM_Filter_Handler_t  PDM_FilterHandler[2];
-static PDM_Filter_Config_t   PDM_FilterConfig[2];
+static PDM_Filter_Handler_t  PDM_FilterHandler;
+static PDM_Filter_Config_t   PDM_FilterConfig;
 
 #define DMA_XFER_NONE   (0x00U)
 #define DMA_XFER_HALF   (0x01U)
@@ -369,23 +369,21 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
     }
     __HAL_CRC_DR_RESET(&hcrc);
 
-    // Configure PDM filters
-    for (int i=0; i<g_i_channels; i++) {
-        PDM_FilterHandler[i].bit_order  = PDM_FILTER_BIT_ORDER_MSB;
+    // Configure PDM filter
+    PDM_FilterHandler.bit_order  = PDM_FILTER_BIT_ORDER_MSB;
 
-        PDM_FilterHandler[i].endianness = PDM_FILTER_ENDIANNESS_LE;
-        //PDM_FilterHandler[i].endianness = PDM_FILTER_ENDIANNESS_BE;
+    PDM_FilterHandler.endianness = PDM_FILTER_ENDIANNESS_LE;
+    //PDM_FilterHandler.endianness = PDM_FILTER_ENDIANNESS_BE;
 
-        PDM_FilterHandler[i].high_pass_tap = (uint32_t) (highpass * 2147483647U); // coff * (2^31-1)
-        PDM_FilterHandler[i].out_ptr_channels = g_o_channels;
-        PDM_FilterHandler[i].in_ptr_channels  = g_i_channels;
-        PDM_Filter_Init(&PDM_FilterHandler[i]);
+    PDM_FilterHandler.high_pass_tap = (uint32_t) (highpass * 2147483647U); // coff * (2^31-1)
+    PDM_FilterHandler.out_ptr_channels = g_o_channels;
+    PDM_FilterHandler.in_ptr_channels  = g_i_channels;
+    PDM_Filter_Init(&PDM_FilterHandler);
 
-        PDM_FilterConfig[i].mic_gain = gain_db;
-        PDM_FilterConfig[i].output_samples_number = samples_per_channel;
-        PDM_FilterConfig[i].decimation_factor = decimation_factor_const;
-        PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
-    }
+    PDM_FilterConfig.mic_gain = gain_db;
+    PDM_FilterConfig.output_samples_number = samples_per_channel;
+    PDM_FilterConfig.decimation_factor = decimation_factor_const;
+    PDM_Filter_setConfig(&PDM_FilterHandler, &PDM_FilterConfig);
 
     uint32_t min_buff_size = samples_per_channel * g_o_channels * sizeof(int16_t);
     uint32_t buff_size = PDMgetBufferSize();
@@ -443,14 +441,12 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
 
 void py_audio_gain_set(int gain_db)
 {
-    // Configure PDM filters
-    for (int i=0; i<g_i_channels; i++) {
-        PDM_FilterConfig[i].mic_gain = gain_db;
-        //This will be called only after init so PDM_FilterConfig structure is already filled
-        //PDM_FilterConfig[i].output_samples_number = samples_per_channel;
-        //PDM_FilterConfig[i].decimation_factor = decimation_factor_const;
-        PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
-    }
+    // Configure PDM filter
+    PDM_FilterConfig.mic_gain = gain_db;
+    //This will be called only after init so PDM_FilterConfig structure is already filled
+    //PDM_FilterConfig.output_samples_number = samples_per_channel;
+    //PDM_FilterConfig.decimation_factor = decimation_factor_const;
+    PDM_Filter_setConfig(&PDM_FilterHandler, &PDM_FilterConfig);
 }
 
 void py_audio_deinit(void)
@@ -493,10 +489,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         xfer_status &= ~(DMA_XFER_HALF);
 
         // Convert PDM samples to PCM
-        for (int i=0; i<g_i_channels; i++) {
-            //PDM_Filter(&((uint8_t*)PDM_BUFFER)[i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
-        	PDM_Filter(&((uint8_t*)PDM_BUFFER)[i], p + i, &PDM_FilterHandler[i]);
-        }
+        PDM_Filter((uint8_t*)PDM_BUFFER, p, &PDM_FilterHandler);
 #if 0
         samples = PCM_BUFFER;
 #endif
@@ -512,10 +505,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         xfer_status &= ~(DMA_XFER_FULL);
 
         // Convert PDM samples to PCM
-        for (int i=0; i<g_i_channels; i++) {
-            //PDM_Filter(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], &((int16_t*)g_pcmbuf)[PCM_BUFFER_SIZE / 2 + i], &PDM_FilterHandler[i]);
-        	PDM_Filter(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], p + i, &PDM_FilterHandler[i]);
-        }
+        PDM_Filter((uint8_t*)(&PDM_BUFFER[PDM_BUFFER_SIZE / 2]), p, &PDM_FilterHandler);
 #if 0
         samples = &PCM_BUFFER[PCM_BUFFER_SIZE / 2];
 #endif

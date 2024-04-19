@@ -182,9 +182,9 @@ int SetSysClock_PLL_HSE(uint8_t bypass, int lowspeed)
     /*
      * we run SAI4 here on PLL3, we can trim factional multiplier, USB runs on PLL1 (PLL) for 48 MHz or here on PLL3
      */
-    PeriphClkInitStruct.PLL3.PLL3M = 2; //5;
+    PeriphClkInitStruct.PLL3.PLL3M = 2;	//5;
     PeriphClkInitStruct.PLL3.PLL3N = 23; //192;
-    PeriphClkInitStruct.PLL3.PLL3P = 6; //20;					//SAI4, PDM MIC. same 48 MHz as USB - but a bit slower!
+    PeriphClkInitStruct.PLL3.PLL3P = 6; //20;					//SAI4, PDM MIC., for 32KHz
     PeriphClkInitStruct.PLL3.PLL3Q = 6;	//20;					//USB 48 KHz
     PeriphClkInitStruct.PLL3.PLL3R = 4;	//20;
     PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_1;
