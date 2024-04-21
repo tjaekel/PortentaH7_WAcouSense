@@ -538,7 +538,7 @@ const TCMD_DEC_Command Commands[] = {
 		},
 		{
 				.cmd = (const char *)"mic",
-				.help = (const char *)"enable <1..51 as db> or disable [0] microphone",
+				.help = (const char *)"enable <1..52> [freq] [sine] as db> [0|1] or disable [0] microphone",
 				.func = CMD_mic,
 				.manPage = 63,		//FIX it
 		},
@@ -1764,7 +1764,7 @@ ECMD_DEC_Status CMD_usb(TCMD_DEC_Results *res, EResultOut out)
 ECMD_DEC_Status CMD_mic(TCMD_DEC_Results *res, EResultOut out)
 {
 	//set the gain, 0 is off
-	PDM_MIC_Init(res->val[0]);
+	PDM_MIC_Init(res->val[0], res->val[1], res->val[2]);
 
 	return CMD_DEC_OK;
 }

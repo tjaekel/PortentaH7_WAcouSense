@@ -184,7 +184,7 @@ int SetSysClock_PLL_HSE(uint8_t bypass, int lowspeed)
      */
     PeriphClkInitStruct.PLL3.PLL3M = 2;	//5;
     PeriphClkInitStruct.PLL3.PLL3N = 23; //192;
-    PeriphClkInitStruct.PLL3.PLL3P = 6; //20;					//SAI4, PDM MIC., for 32KHz
+    PeriphClkInitStruct.PLL3.PLL3P = 6; //20;					//SAI4, PDM MIC., trimmed for 48KHz
     PeriphClkInitStruct.PLL3.PLL3Q = 6;	//20;					//USB 48 KHz
     PeriphClkInitStruct.PLL3.PLL3R = 4;	//20;
     PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_1;

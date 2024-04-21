@@ -33,6 +33,12 @@
 
 #include "power_mngt.h"
 
+/** TODO:
+ * fix index for QSPI man pages
+ * update man pages and flash QSPI chip
+ * add PDM sine pattern and play instead of MICs (as reference)
+ */
+
 #ifndef HSEM_ID_0
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
@@ -92,11 +98,12 @@ const osThreadAttr_t TOFThread_attributes = {
 osSemaphoreId xSemaphoreGPIOINT   = NULL;
 osSemaphoreId xSemaphoreTOF		  = NULL;
 
-CRC_HandleTypeDef hcrc;
-
 static void MX_GPIO_Init(void);
 static void MPU_Config(void);
+#if 0
 static void MX_CRC_Init(void);
+CRC_HandleTypeDef hcrc;
+#endif
 
 void StartDefaultTask(void *argument);
 void StartUARTTask(void *argument);
@@ -218,7 +225,9 @@ int main(void)
 #endif
 
   ADC3_Init();
+#if 0
   MX_CRC_Init();
+#endif
 
   /* Initialize RTOS scheduler */
    osKernelInitialize();
@@ -448,6 +457,7 @@ static void MX_GPIO_Init(void)
   	HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 }
 
+#if 0
 static void MX_CRC_Init(void)
 {
   hcrc.Instance = CRC;
@@ -462,6 +472,7 @@ static void MX_CRC_Init(void)
   }
   __HAL_CRC_DR_RESET(&hcrc);
 }
+#endif
 
 /**
   * @brief  Function implementing the defaultTask thread.

@@ -25,7 +25,7 @@ extern "C" {
  * macro for Version Info Welcome message
  */
 #define STR_CHIP			"STM32H747"
-#define STR_FW_VERSION		"V1.00"
+#define STR_FW_VERSION		"V1.10"
 #define STR_FW_COMPLETE		"\r\n\r\n**** Portenta H7 WAcouSense " STR_FW_VERSION " ****\r\n--------------------------------------\r\n"
 
 #define PRINT_VERSION		UART_Send((uint8_t *)STR_FW_COMPLETE, strlen(STR_FW_COMPLETE), UART_OUT)
