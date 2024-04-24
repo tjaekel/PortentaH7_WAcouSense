@@ -550,14 +550,14 @@ static uint8_t __attribute__((section(".itcmram"))) USBD_AUDIO_DataIn (USBD_Hand
   if (USBInIdxRd >= USB_BUF_SIZE)
 	  USBInIdxRd = 0;
 
-#ifdef TIMING_DEBUG
+#ifdef TIMING_DEBUG_USB
   if (USBInIdxRd)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
   else
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
 #endif
 
-#if 0
+#if 1
   USBD_AUDIO_CpyBuf(USBInIdxRd);
 #endif
 
