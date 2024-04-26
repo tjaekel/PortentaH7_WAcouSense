@@ -122,7 +122,7 @@ int SetSysClock_PLL_HSE(uint8_t bypass, int lowspeed)
         										//25 : 62.5 MHz - OK, 24 : 60 MHz - OK
     }
     else {
-        RCC_OscInitStruct.PLL.PLLN = 196;		//192 = 480 MHz - with a 25 MHz XTAL! 196 = 490 MHz, 200 = 500 MHz - over-clocked
+        RCC_OscInitStruct.PLL.PLLN = 192;		//192 = 480 MHz - with a 25 MHz XTAL! 196 = 490 MHz, 200 = 500 MHz - over-clocked
         /* ATTENTION: when using Backup RAM: >450 MHz (value 180) fails: it crashes sometimes when accessing BackupRAM! */
     }
 #endif
@@ -219,7 +219,7 @@ int SetSysClock_PLL_HSE(uint8_t bypass, int lowspeed)
 
     	//enable also RTC: we use the BKPxx registers
     	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC | RCC_PERIPHCLK_USB | RCC_PERIPHCLK_SPI2 | RCC_PERIPHCLK_QSPI | RCC_PERIPHCLK_ADC /*| RCC_PERIPHCLK_SAI4A*/ | RCC_PERIPHCLK_TIM;
-    	PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48; //RCC_USBCLKSOURCE_PLL; 		//RCC_USBCLKSOURCE_PLL3;		//RCC_USBCLKSOURCE_HSI48;
+    	PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;	//RCC_USBCLKSOURCE_HSI48; //RCC_USBCLKSOURCE_PLL; 		//RCC_USBCLKSOURCE_PLL3;		//RCC_USBCLKSOURCE_HSI48;
     	PeriphClkInitStruct.QspiClockSelection = RCC_QSPICLKSOURCE_PLL2;	//RCC_QSPICLKSOURCE_PLL; //RCC_QSPICLKSOURCE_PLL2;
     	PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
     	/* PeriphClkInitStruct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL3; //RCC_SAI4ACLKSOURCE_PLL; //RCC_SAI4ACLKSOURCE_PLL3; */

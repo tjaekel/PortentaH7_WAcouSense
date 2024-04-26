@@ -147,14 +147,14 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-#if 0
-  //just if use bootloader and start from 0x08040000
-  unsigned long vectTable;
+#ifdef ARDUINO_BOOTLOADER
+  //just if using bootloader and start from 0x08040000
+  ////unsigned long vectTable;
 
-  vectTable = (unsigned long)SCB->VTOR;
+  ////vectTable = (unsigned long)SCB->VTOR;
   SCB->VTOR = (unsigned long)0x08040000;
   ////SCB->VTOR = (unsigned long)0x20000000;	//it is not copied yet! - the old bootloader table is there
-  vectTable = (unsigned long)SCB->VTOR;
+  ////vectTable = (unsigned long)SCB->VTOR;
 #endif
 
   if (SetSysClock_PLL_HSE(1, 0) == 0)

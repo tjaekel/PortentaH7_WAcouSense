@@ -16,6 +16,7 @@ This project is __not__ an _Arduino/mbed sketch_. It is native C-code (not C++),
 - Breakout Board: using ETH, PDM MICs, IMU and USB-A connection
 - with Breakout Board: add Adafruit PDM MIC ("Adafruit PDM MEMS") and IMU as "Adafruit LSM9DS1" (via flying wires, optional)
 - SparkFun VL53L5CX TOF sensor (connected via I2C flying wires)
+- using the User USB for PDM MIC to host nees an USB-A to USB-A cable, but only on breakout board
 
 ## Features of the project
 - it provides an UART shell via the USB-C connection, see "help" command there - the UART is used to control the MCU, to set
@@ -29,10 +30,11 @@ This project is __not__ an _Arduino/mbed sketch_. It is native C-code (not C++),
 - two PWM channels for RC model servos
 - QSPI flash: used for man pages
 - SPI and I2C peripherals
-- USB-A on Breakout Board (for Audio, prepared for USB as external memory device, a second VCP UART)
+- USB-A on Breakout Board (for Audio, prepared for USB as external memory device (noat active), a second VCP UART)
 - PDM MIC(s) on Breakout board (or on Vision Shield) - use Pico-C to initialize and read IMU data (without any C-compiler needed)
-- send PDM MIC audio via VBAN to a host PC
+- send PDM MIC audio via VBAN to a host PC or use Usedr USB on breakout board
 - it gets the TOF sensor data and sends it via UDP to a host PC (use Python scripts to post-process)
+- several signal generators (sine wave): played as PCM (without PDM), as PDM (instead of MIC), recorded sine waves via MICs, record one via MIC and replay
 
 ## Full Open Source
 The project has all source code files, including the PMIC configuration, INT vectors, drivers, startup - not using any Arduino/mbed library.
@@ -53,5 +55,6 @@ The CubeMX X-CUBE-TOF1 for the TOF sensor is integreated (and modified to  used 
 See more details here: https://www.st.com/en/ecosystems/x-cube-tof1.html
 
 ## Python scripts
-I will add demo Python scripts, e.g. to get the PDM MIC audio and the TOF sensor data, via network (using UDP sockets).
+I add demo Python scripts, e.g. to get the PDM MIC audio and the TOF sensor data, via network (using UDP sockets).
+There are also Python and Matlab script for generating a PDM signal.
 
