@@ -10,5 +10,6 @@
 
 void PDM_MIC_Init(unsigned long gain, unsigned long freq, int gen_sine);
 void PDM_MIC_Sample();
+void PDM_MIC_Config(unsigned long p, unsigned long f);
 
 #endif /* PDM_MIC_H_ */

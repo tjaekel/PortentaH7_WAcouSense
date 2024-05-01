@@ -12,7 +12,11 @@
 
 #include <stdio.h>
 #include "stm32h7xx_hal.h"
-#include "pdm2pcm_glo.h"
+#include "pdm2pcm_glo.h"		//STM PDM2PCM
+#include "pdm_filter.h"			//other PDM Filter
+#ifdef OWN_PDM_FILTER
+#include "PDMFilter_tj.h"		//my PDM Filter
+#endif
 #include "audio.h"
 #include "stdbool.h"
 
@@ -34,6 +38,18 @@ static int g_i_channels = AUDIO_SAI_NBR_CHANNELS;
 static int g_o_channels = AUDIO_SAI_NBR_CHANNELS;
 static PDM_Filter_Handler_t  PDM_FilterHandler[2];
 static PDM_Filter_Config_t   PDM_FilterConfig[2];
+int sgain;
+int sFilter;
+
+#ifdef OWN_PDM_FILTER
+static TPDMFilter sPDMFilter;
+#endif
+
+static int sHPcoeff = 2104533974;
+
+#ifndef OWN_PDM_FILTER
+static PDMFilter2_InitStruct PDM2_Filter[2];
+#endif
 
 #define DMA_XFER_NONE   (0x00U)
 #define DMA_XFER_HALF   (0x01U)
@@ -713,7 +729,8 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
     {
     	PDM_FilterHandler[i].bit_order  = PDM_FILTER_BIT_ORDER_MSB;
     	PDM_FilterHandler[i].endianness = PDM_FILTER_ENDIANNESS_LE;
-    	PDM_FilterHandler[i].high_pass_tap = (uint32_t) (highpass * 2147483647U); // coff * (2^31-1)
+    	////PDM_FilterHandler[i].high_pass_tap = (uint32_t) (highpass * 2147483647U); // coff * (2^31-1)
+    	PDM_FilterHandler[i].high_pass_tap = (uint32_t)sHPcoeff; 					  // coff * (2^31-1)
     	PDM_FilterHandler[i].out_ptr_channels = g_o_channels;
     	PDM_FilterHandler[i].in_ptr_channels  = g_i_channels;
     	PDM_Filter_Init(&PDM_FilterHandler[i]);
@@ -723,6 +740,21 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
     	PDM_FilterConfig[i].decimation_factor = decimation_factor_const;
     	PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
     }
+
+#ifdef OWN_PDM_FILTER
+    //my PDM Filter
+    PDM_Filtertj_Init(&sPDMFilter);
+#else
+    for (int i = 0; i < g_i_channels; i++)
+    {
+        PDM2_Filter[i].Fs = 48000;
+        PDM2_Filter[i].HP_HZ = 100;
+        PDM2_Filter[i].LP_HZ = 4000;
+        PDM2_Filter[i].In_MicChannels  = 2;
+        PDM2_Filter[i].Out_MicChannels = 2;
+        PDM_Filter2_Init(&PDM2_Filter[i]);
+    }
+#endif
 
     uint32_t min_buff_size = samples_per_channel * g_o_channels * sizeof(int16_t);
     uint32_t buff_size = PDMgetBufferSize();
@@ -945,6 +977,31 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
 
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
+        {
+        	if ( ! sFilter)
+#ifndef OWN_PDM_FILTER
+        	for (int i = 0; i < g_i_channels; i++)
+        	{
+        		switch (gGen_pdm)
+        		{
+        		case 2 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples)[i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 3 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples2)[i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 4 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples3)[i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 5 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_SamplesX)[i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		default:
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_BUFFER)[i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        		}
+        	}
+        	else
+#endif
         	for (int i = 0; i < g_i_channels; i++)
         	{
         		switch (gGen_pdm)
@@ -961,12 +1018,32 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         		case 5 :
         			PDM_Filter(&((uint8_t*)PDM_SamplesX)[i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         			break;
-
         		default:
         			PDM_Filter(&((uint8_t*)PDM_BUFFER)[i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         		}
-
         	}
+#ifdef OWN_PDM_FILTER
+        	else
+			switch (gGen_pdm)
+			{
+			case 2 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples)[0], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 3 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples2)[0], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 4 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples3)[0], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 5 :
+				PDM_Filtertj(&((uint8_t*)PDM_SamplesX)[0], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			default:
+				PDM_Filtertj(&((uint8_t*)PDM_BUFFER)[0], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+			}
+#endif
+        }
+
 #ifdef TIMING_DEBUG
         HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 #endif
@@ -980,6 +1057,31 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
 
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
+        {
+        	if ( ! sFilter)
+#ifndef OWN_PDM_FILTER
+        	for (int i = 0; i < g_i_channels; i++)
+        	{
+        		switch (gGen_pdm)
+        		{
+        		case 2 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples)[PDM_BUFFER_SIZE / 2 + i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 3 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples2)[PDM_BUFFER_SIZE / 2 + i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 4 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_Samples3)[PDM_BUFFER_SIZE / 2 + i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		case 5 :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_SamplesX)[PDM_BUFFER_SIZE / 2 + i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        			break;
+        		default :
+        			PDM_Filter2_64_LSB(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], &((uint16_t*)g_pcmbuf)[i], sgain, &PDM2_Filter[i]);
+        		}
+        	}
+        	else
+#endif
         	for (int i = 0; i < g_i_channels; i++)
         	{
         		switch (gGen_pdm)
@@ -1001,6 +1103,29 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         			PDM_Filter(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         		}
         	}
+#ifdef OWN_PDM_FILTER
+        	else
+			switch (gGen_pdm)
+			{
+			case 2 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples)[PDM_BUFFER_SIZE / 2], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 3 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples2)[PDM_BUFFER_SIZE / 2], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 4 :
+				PDM_Filtertj(&((uint8_t*)PDM_Samples3)[PDM_BUFFER_SIZE / 2], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+			case 5 :
+				PDM_Filtertj(&((uint8_t*)PDM_SamplesX)[PDM_BUFFER_SIZE / 2], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+				break;
+
+			default :
+				PDM_Filtertj(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2], &((int16_t*)g_pcmbuf)[0], &sPDMFilter);
+			}
+#endif
+        }
+
 #ifdef TIMING_DEBUG
         HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 #endif
@@ -1076,7 +1201,6 @@ void PDM_MIC_Init(unsigned long gain, unsigned long freq, int gen_sine)
 	uint32_t rFreq;
 	if (gain)		//stop with gain 0
 	{
-		int sgain;
 		/* REMARK: 16000 is just single MIC (left) and mono - why?
 		 *
 		 * 44100, 22050 etc. not tested and not working!
@@ -1136,6 +1260,22 @@ void PDM_MIC_Sample(void)
 	}
 #endif
 	print_log(UART_OUT, "\r\n");
+}
+
+void PDM_MIC_Config(unsigned long p, unsigned long f)
+{
+	//set HP coefficient as: 0.xx * (2exp31 - 1)
+	switch (p)
+	{
+	case 0 : sHPcoeff = 0;					//0 for off
+	case 1 : sHPcoeff = 2147483647; break;	//1.0 is off
+	case 2 : sHPcoeff = 1717986918; break;	//0.8
+	case 3 : sHPcoeff = 1932735282; break;	//0.9
+	case 4 : sHPcoeff = 2104533974; break;	//0.98
+	case 5 : sHPcoeff = 2136746229; break;	//0.995 - almost like off
+	}
+
+	sFilter = f;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -122,6 +122,7 @@ ECMD_DEC_Status CMD_udpip(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_usb(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_mic(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_mics(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_micc(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_cservo(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_sservo(TCMD_DEC_Results *res, EResultOut out);
@@ -547,6 +548,12 @@ const TCMD_DEC_Command Commands[] = {
 				.cmd = (const char *)"mics",
 				.help = (const char *)"capture PDM signal",
 				.func = CMD_mics,
+				.manPage = 63,		//FIX it
+		},
+		{
+				.cmd = (const char *)"micc",
+				.help = (const char *)"configure PDM HP filter [0...]",
+				.func = CMD_micc,
 				.manPage = 63,		//FIX it
 		},
 		{
@@ -1778,8 +1785,21 @@ ECMD_DEC_Status CMD_mic(TCMD_DEC_Results *res, EResultOut out)
 
 ECMD_DEC_Status CMD_mics(TCMD_DEC_Results *res, EResultOut out)
 {
+	(void)res;
+	(void)out;
+
 	//sample one PDM MIC buffer
 	PDM_MIC_Sample();
+
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_micc(TCMD_DEC_Results *res, EResultOut out)
+{
+	(void)out;
+
+	//set MIC parameter, e.g. HP filter coefficient
+	PDM_MIC_Config(res->val[0], res->val[1]);
 
 	return CMD_DEC_OK;
 }

@@ -89,6 +89,9 @@
 									<listOptionValue builtIn="false" value="../../CM7/TOF_53L5A1"/>
 									<listOptionValue builtIn="false" value="../../CM7/USB_A"/>
 									<listOptionValue builtIn="false" value="../../CM7/power_mngt"/>
+									<listOptionValue builtIn="false" value="../../CM7/PDMFilter"/>
+									<listOptionValue builtIn="false" value="../../CM7/PDMFilter_tj"/>
+									<listOptionValue builtIn="false" value="../../CM7/DSP/Include"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.801237429" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -153,8 +156,11 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry excluding="BSP/Components/mt25tl01g|Inc/fsdata_custom.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry excluding="Source/CommonTables/CommonTables.c|Source/TransformFunctions/TransformFunctions.c|Source/SupportFunctions/SupportFunctions.c|Source/StatisticsFunctions/StatisticsFunctions.c|Source/MatrixFunctions/MatrixFunctions.c|Source/FilteringFunctions/FilteringFunctions.c|Source/FastMathFunctions/FastMathFunctions.c|Source/ControllerFunctions/ControllerFunctions.c|Source/ComplexMathFunctions/ComplexMathFunctions.c|Source/BasicMathFunctions/BasicMathFunctions.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="DSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
@@ -254,8 +260,11 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry excluding="BSP/Components/mt25tl01g|Inc/fsdata_custom.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry excluding="Source/CommonTables/CommonTables.c|Source/TransformFunctions/TransformFunctions.c|Source/SupportFunctions/SupportFunctions.c|Source/StatisticsFunctions/StatisticsFunctions.c|Source/MatrixFunctions/MatrixFunctions.c|Source/FilteringFunctions/FilteringFunctions.c|Source/FastMathFunctions/FastMathFunctions.c|Source/ControllerFunctions/ControllerFunctions.c|Source/ComplexMathFunctions/ComplexMathFunctions.c|Source/BasicMathFunctions/BasicMathFunctions.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="DSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
