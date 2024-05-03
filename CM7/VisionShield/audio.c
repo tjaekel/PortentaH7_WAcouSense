@@ -39,7 +39,7 @@ static int g_o_channels = AUDIO_SAI_NBR_CHANNELS;
 static PDM_Filter_Handler_t  PDM_FilterHandler[2];
 static PDM_Filter_Config_t   PDM_FilterConfig[2];
 int sgain;
-int sFilter;
+int sFilter = 1;
 
 #ifdef OWN_PDM_FILTER
 static TPDMFilter sPDMFilter;
@@ -978,7 +978,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
         {
-        	if ( ! sFilter)
+        	if (sFilter)
 #ifndef OWN_PDM_FILTER
         	for (int i = 0; i < g_i_channels; i++)
         	{
@@ -1058,7 +1058,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
         {
-        	if ( ! sFilter)
+        	if (sFilter)
 #ifndef OWN_PDM_FILTER
         	for (int i = 0; i < g_i_channels; i++)
         	{

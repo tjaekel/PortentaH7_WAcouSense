@@ -20,3 +20,7 @@ for i in range(len(bytes)) :
     print('0x{:02x}, '.format(bytes[i]), end='')
     print('0x{:02x}, '.format(bytes[i]), end='')
 
+#print to import into Excel
+for i in range(len(pdm)) :
+    print(pdm[i])
+

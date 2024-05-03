@@ -61,6 +61,7 @@
 									<listOptionValue builtIn="false" value="XXX_TIMING_DEBUG"/>
 									<listOptionValue builtIn="false" value="XXX_TIMING_DEBUG_USB"/>
 									<listOptionValue builtIn="false" value="ARDUINO_BOOTLOADER"/>
+									<listOptionValue builtIn="false" value="OWN_PDM_FILTER"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.840057799" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
@@ -160,7 +161,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
+						<entry excluding="arm_fir_data.c|math_helper.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
@@ -264,7 +265,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers/STM32H7xx_HAL_Driver/Src"/>
 						<entry excluding="Third_Party/FatFs/src/option/ccsbcs.c|Third_Party/FatFs/src/option/cc950.c|Third_Party/FatFs/src/option/cc949.c|Third_Party/FatFs/src/option/cc936.c|Third_Party/FatFs/src/option/cc932.c|Third_Party/LwIP/src/apps/http/fsdata.c|Third_Party/LwIP/src/apps/http/makefsdata|Third_Party/LwIP/test|Third_Party/LwIP/doc|ST/STM32_USB_Host_Library" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
+						<entry excluding="arm_fir_data.c|math_helper.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PDMFilter_tj"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TOF_53L5A1"/>
 						<entry excluding="usbd_conf.c|usbd_conf2.c|usbd_desc_msc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_A"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="VisionShield"/>
