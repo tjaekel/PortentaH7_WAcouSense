@@ -978,7 +978,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
         {
-        	if (sFilter)
+        	if (sFilter & 1)
 #ifndef OWN_PDM_FILTER
         	for (int i = 0; i < g_i_channels; i++)
         	{
@@ -1002,6 +1002,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         	}
         	else
 #endif
+        	{
         	for (int i = 0; i < g_i_channels; i++)
         	{
         		switch (gGen_pdm)
@@ -1021,6 +1022,11 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         		default:
         			PDM_Filter(&((uint8_t*)PDM_BUFFER)[i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         		}
+        	}
+#ifdef OWN_PDM_FILTER
+        	if (sFilter & 2)
+        		PDM_PostFilter(&((int16_t*)g_pcmbuf)[0], NULL);
+#endif
         	}
 #ifdef OWN_PDM_FILTER
         	else
@@ -1058,7 +1064,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         // Convert PDM samples to PCM
         if ( ! gGen_sine)
         {
-        	if (sFilter)
+        	if (sFilter & 1)
 #ifndef OWN_PDM_FILTER
         	for (int i = 0; i < g_i_channels; i++)
         	{
@@ -1082,6 +1088,7 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         	}
         	else
 #endif
+        	{
         	for (int i = 0; i < g_i_channels; i++)
         	{
         		switch (gGen_pdm)
@@ -1102,6 +1109,11 @@ void __attribute__((section(".itcmram"))) audio_pendsv_callback(void)
         		default :
         			PDM_Filter(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         		}
+        	}
+#ifdef OWN_PDM_FILTER
+        	if (sFilter & 2)
+        		PDM_PostFilter(&((int16_t*)g_pcmbuf)[0], NULL);
+#endif
         	}
 #ifdef OWN_PDM_FILTER
         	else
@@ -1267,12 +1279,12 @@ void PDM_MIC_Config(unsigned long p, unsigned long f)
 	//set HP coefficient as: 0.xx * (2exp31 - 1)
 	switch (p)
 	{
-	case 0 : sHPcoeff = 0;					//0 for off
 	case 1 : sHPcoeff = 2147483647; break;	//1.0 is off
 	case 2 : sHPcoeff = 1717986918; break;	//0.8
 	case 3 : sHPcoeff = 1932735282; break;	//0.9
 	case 4 : sHPcoeff = 2104533974; break;	//0.98
 	case 5 : sHPcoeff = 2136746229; break;	//0.995 - almost like off
+	default : sHPcoeff = 0;					//0 for off
 	}
 
 	sFilter = f;

@@ -30,6 +30,10 @@
 
 #include "picoc.h"
 
+#ifdef OWN_PDM_FILTER
+#include "PDMFilter_tj.h"
+#endif
+
 /* user command string buffer */
 //#define USR_CMD_STR_SIZE		80
 static char usrCmdBuf[USR_CMD_STR_SIZE]  = {'\0'};
@@ -123,6 +127,7 @@ ECMD_DEC_Status CMD_usb(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_mic(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_mics(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_micc(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_micv(TCMD_DEC_Results *res, EResultOut out);
 
 ECMD_DEC_Status CMD_cservo(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_sservo(TCMD_DEC_Results *res, EResultOut out);
@@ -552,8 +557,14 @@ const TCMD_DEC_Command Commands[] = {
 		},
 		{
 				.cmd = (const char *)"micc",
-				.help = (const char *)"configure PDM HP filter [0...]",
+				.help = (const char *)"configure PDM HP filter [0...] select filter [0|1|3]",
 				.func = CMD_micc,
+				.manPage = 63,		//FIX it
+		},
+		{
+				.cmd = (const char *)"micv",
+				.help = (const char *)"set filter volumne <v1> <v2>",
+				.func = CMD_micv,
 				.manPage = 63,		//FIX it
 		},
 		{
@@ -1801,6 +1812,17 @@ ECMD_DEC_Status CMD_micc(TCMD_DEC_Results *res, EResultOut out)
 	//set MIC parameter, e.g. HP filter coefficient
 	PDM_MIC_Config(res->val[0], res->val[1]);
 
+	return CMD_DEC_OK;
+}
+
+ECMD_DEC_Status CMD_micv(TCMD_DEC_Results *res, EResultOut out)
+{
+	(void)out;
+
+#ifdef OWN_PDM_FILTER
+	//set filter volume
+	PDM_FilterSet(res->val[0], res->val[1]);
+#endif
 	return CMD_DEC_OK;
 }
 

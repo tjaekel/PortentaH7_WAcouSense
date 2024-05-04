@@ -24,10 +24,15 @@
 #define NUM_TAPS             171
 #define NUM_TAPS2			 9
 
+#define POST_FILTER
+
 static float32_t firStateF32l[BLOCK_SIZE + NUM_TAPS - 1];
 static float32_t firStateF32r[BLOCK_SIZE + NUM_TAPS - 1];
 static float32_t firStateF32_2l[AUDIO_FS + NUM_TAPS - 1];
 static float32_t firStateF32_2r[AUDIO_FS + NUM_TAPS - 1];
+
+static unsigned long sV1 = 1;
+static unsigned long sV2 = 27520;
 
 const float32_t firCoeffs32[NUM_TAPS] = {
 		  0.0010363761260485773,
@@ -220,9 +225,20 @@ arm_fir_decimate_instance_f32 Sr;
 arm_fir_instance_f32 S2l;
 arm_fir_instance_f32 S2r;
 
-float32_t pdmFin[BLOCK_SIZE];
-float32_t pcmFout[AUDIO_FS];
-float32_t pcmFout_2[AUDIO_FS];
+static float32_t pdmFin[BLOCK_SIZE];
+static float32_t pcmFout[AUDIO_FS];
+static float32_t pcmFout_2[AUDIO_FS];
+
+static double lastIn[2]  = {0.0, 0.0};
+static double lastOut[2] = {0.0, 0.0};
+
+void PDM_PostFilter_Init(TPDMFilter *pdmFilter)
+{
+	(void)pdmFilter;
+
+	arm_fir_init_f32(&S2l, NUM_TAPS2, (float32_t *)&firCoeffs32_2[0], &firStateF32_2l[0], AUDIO_FS);
+	arm_fir_init_f32(&S2r, NUM_TAPS2, (float32_t *)&firCoeffs32_2[0], &firStateF32_2r[0], AUDIO_FS);
+}
 
 void PDM_Filtertj_Init(TPDMFilter *pdmFilter)
 {
@@ -231,8 +247,7 @@ void PDM_Filtertj_Init(TPDMFilter *pdmFilter)
 	 ///arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], blockSize);
 	arm_fir_decimate_init_f32(&Sl, NUM_TAPS, PDM_DECIMATION, (float32_t *)&firCoeffs32[0], &firStateF32l[0], BLOCK_SIZE);
 	arm_fir_decimate_init_f32(&Sr, NUM_TAPS, PDM_DECIMATION, (float32_t *)&firCoeffs32[0], &firStateF32r[0], BLOCK_SIZE);
-	arm_fir_init_f32(&S2l, NUM_TAPS2, (float32_t *)&firCoeffs32_2[0], &firStateF32_2l[0], AUDIO_FS);
-	arm_fir_init_f32(&S2r, NUM_TAPS2, (float32_t *)&firCoeffs32_2[0], &firStateF32_2r[0], AUDIO_FS);
+	PDM_PostFilter_Init(NULL);
 }
 
 /**
@@ -246,9 +261,9 @@ void ConvertPDM(unsigned char *in, float32_t *out)
 	for (i = 0; i < (PDM_DECIMATION * AUDIO_FS); i++)
 	{
 		if ((*in >> k) & 1)
-			f = +0.49;
+			f = +0.5;
 		else
-			f = -0.49;
+			f = -0.5;
 		*out++ = f;
 		k++;
 		if (k >= 8)
@@ -264,9 +279,89 @@ void ConvertPCM(float32_t *in, signed short *out)
 	int i;
 	for (i = 0; i < AUDIO_FS; i++)
 	{
-		*out = (signed short)(*in++ * (32767.0*2.18));		//trim for same reference volume
+		*out = (signed short)(*in++ * (32767.0*(sV1 + sV2/100000)));		//trim for same reference volume
 		out += 2;
 	}
+}
+
+/**
+  * @fn void DC_BlockerSample(int ch, int32_t *inOutPtr)
+  * @brief  remove DC from one sample on one channel
+  * @param  ch: the channel mumber
+  * @param  inOutPtr: the pointer to the (32bit) sample
+  * @retval None
+  */
+void DC_BlockerSample(signed short *inOutPtr, int ch)
+{
+//define float -> int16_t conversion with rounding handling,
+//make sure not to use LIB function round which is different
+//ATT: use suffix f for 0.5, otherwise converted to double internally
+#define ROUND(x) ((x)>=0?(signed short)((x)+0.5):(signed short)((x)-0.5))
+#define ALPHA 0.9999			//the factor - the larger the faster to reach DC free signal: 0.999 results in -3dB @ 10Hz
+
+	register double tmp, res;
+
+	tmp = (double)*inOutPtr;
+
+	res = tmp - lastIn[ch] + ALPHA * lastOut[ch];
+	lastIn[ch]  = tmp;
+	lastOut[ch] = res;
+
+	*inOutPtr = ROUND(res);
+}
+
+void PCM_DC_Blocker(signed short *inOutPtr, int ch)
+{
+	int i;
+	for (i = 0; i < AUDIO_FS; i++)
+	{
+		DC_BlockerSample(inOutPtr, ch);
+		inOutPtr += 2;
+	}
+}
+
+/* one channel post LP filter, after PDM2PCM, assuming two channels are configured */
+void PDM_PostFilter(signed short *inout, TPDMFilter *pdmFilter)
+{
+	int i;
+	signed short *inoutX = inout;
+	//use the buffers here
+	for (i = 0; i < AUDIO_FS; i++)
+	{
+		pcmFout[i] = (float32_t)(*inout) / (32768.0/sV1);
+		inout += 2;
+	}
+	arm_fir_f32(&S2l, pcmFout, pcmFout_2, AUDIO_FS);
+	inout = inoutX;
+	for (i = 0; i < AUDIO_FS; i++)
+	{
+		*inout = (signed short)(pcmFout_2[i] * sV2);
+		inout += 2;
+	}
+	inout = inoutX + 1;
+	for (i = 0; i < AUDIO_FS; i++)
+	{
+		pcmFout[i] = (float32_t)(*inout) / (32768.0/sV1);
+		inout += 2;
+	}
+	arm_fir_f32(&S2r, pcmFout, pcmFout_2, AUDIO_FS);
+	inout = inoutX + 1;
+	for (i = 0; i < AUDIO_FS; i++)
+	{
+		*inout = (signed short)(pcmFout_2[i] * sV2);
+		inout += 2;
+	}
+
+	PCM_DC_Blocker(inoutX, 0);
+	PCM_DC_Blocker(inoutX + 1, 1);
+}
+
+void PDM_FilterSet(unsigned long v1, unsigned long v2)
+{
+	if (sV1 == 0)
+		sV1 = 1;
+	sV1 = v1;
+	sV2 = v2;
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -277,7 +372,7 @@ void PDM_Filtertj(unsigned char *pdm, signed short *pcm, TPDMFilter *pdmFilter)
 
 	ConvertPDM(pdm, pdmFin);
 	arm_fir_decimate_f32(&Sl, pdmFin, pcmFout, BLOCK_SIZE);
-#ifndef POST_FILTER
+#ifdef POST_FILTER
 	arm_fir_f32(&S2l, pcmFout, pcmFout_2, AUDIO_FS);
 	ConvertPCM(pcmFout_2, pcm);
 #else
@@ -286,7 +381,7 @@ void PDM_Filtertj(unsigned char *pdm, signed short *pcm, TPDMFilter *pdmFilter)
 	//2nd channel
 	ConvertPDM(pdm+1, pdmFin);
 	arm_fir_decimate_f32(&Sr, pdmFin, pcmFout, BLOCK_SIZE);
-#ifndef POST_FILTER
+#ifdef POST_FILTER
 	arm_fir_f32(&S2r, pcmFout, pcmFout_2, AUDIO_FS);
 	ConvertPCM(pcmFout_2, pcm+1);
 #else

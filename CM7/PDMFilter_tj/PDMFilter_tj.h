@@ -21,4 +21,9 @@ typedef struct {
 void PDM_Filtertj_Init(TPDMFilter *pdmFilter);
 void PDM_Filtertj(unsigned char *pdm, signed short *pcm, TPDMFilter *pdmFilter);
 
+void PDM_PostFilter_Init(TPDMFilter *pdmFilter);
+void PDM_PostFilter(signed short *inout, TPDMFilter *pdmFilter);
+
+void PDM_FilterSet(unsigned long v1, unsigned long v2);
+
 #endif /* PDMFILTER_TJ_H_ */
