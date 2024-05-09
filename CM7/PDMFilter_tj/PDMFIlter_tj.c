@@ -31,8 +31,8 @@ static float32_t firStateF32r[BLOCK_SIZE + NUM_TAPS - 1];
 static float32_t firStateF32_2l[AUDIO_FS + NUM_TAPS - 1];
 static float32_t firStateF32_2r[AUDIO_FS + NUM_TAPS - 1];
 
-static unsigned long sV1 = 1;
-static unsigned long sV2 = 27520;
+static unsigned long sV1 = 2;
+static unsigned long sV2 = 13750;
 
 const float32_t firCoeffs32[NUM_TAPS] = {
 		  0.0010363761260485773,
@@ -297,7 +297,7 @@ void DC_BlockerSample(signed short *inOutPtr, int ch)
 //make sure not to use LIB function round which is different
 //ATT: use suffix f for 0.5, otherwise converted to double internally
 #define ROUND(x) ((x)>=0?(signed short)((x)+0.5):(signed short)((x)-0.5))
-#define ALPHA 0.9999			//the factor - the larger the faster to reach DC free signal: 0.999 results in -3dB @ 10Hz
+#define ALPHA 0.999			//the factor - the larger the faster to reach DC free signal: 0.999 results in -3dB @ 10Hz
 
 	register double tmp, res;
 
@@ -352,8 +352,10 @@ void PDM_PostFilter(signed short *inout, TPDMFilter *pdmFilter)
 		inout += 2;
 	}
 
+#if 0
 	PCM_DC_Blocker(inoutX, 0);
 	PCM_DC_Blocker(inoutX + 1, 1);
+#endif
 }
 
 void PDM_FilterSet(unsigned long v1, unsigned long v2)

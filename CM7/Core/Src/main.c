@@ -123,6 +123,11 @@ int main(void)
 	if (I2C_PMIC_Initialize())
 		SYS_SetError(SYS_ERR_SYSCFG);
 
+	/* enable hard fault, bus error etc. */
+	//SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;	//does not work at the end
+	//SCnSCB->ACTLR |= SCnSCB_ACTLR_DISDEFWBUF_Msk;		/* does not exist! */
+	//SCnSCB->ACTLR |= SCnSCB_ACTLR_DISDI_Msk;
+
 	/* MPU for ETH buffers - not cache-able */
 	MPU_Config();
 

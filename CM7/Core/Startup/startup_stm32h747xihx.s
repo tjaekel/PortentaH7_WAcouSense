@@ -128,6 +128,11 @@ HardFault_Loop:
 
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
+	TST 	LR, #4
+  	ITE 	EQ
+  	MRSEQ 	R0, MSP
+  	MRSNE 	R0, PSP
+  	B		HardFault_Handler_C
 Infinite_Loop:
 	b	Infinite_Loop
 	.size	Default_Handler, .-Default_Handler

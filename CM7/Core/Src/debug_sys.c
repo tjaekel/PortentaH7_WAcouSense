@@ -27,6 +27,7 @@ tCFGparams GSysCfg = {
 		.ChipNo				= 1,						//13
 		.SysCfg				= 0							//14
 														//max: 19!
+		//we use 15..19 for crash report
 };
 
 tCFGparams GSysCfgDefault = {
@@ -143,4 +144,16 @@ void SYSCFG_print(EResultOut out)
 		print_log(out, "13 : Chip Number    : %ld\r\n", 	*rtcBkpReg++);
 		print_log(out, "14 : SysCfg         : 0x%08lx\r\n", *rtcBkpReg++);
 	}
+}
+
+void SYSCFG_printCrashInfo(EResultOut out)
+{
+	uint32_t *rtcBkpReg = (uint32_t *)&RTC_START_BKP_REG;
+	rtcBkpReg += 15;			//skip the syscfg
+	/* we print the RTC backup registers */
+	print_log(out, " 0 : 0x%08lx\r\n", *rtcBkpReg++);
+	print_log(out, " 1 : 0x%08lx\r\n", *rtcBkpReg++);
+	print_log(out, " 2 : 0x%08lx\r\n", *rtcBkpReg++);
+	print_log(out, " 3 : 0x%08lx\r\n", *rtcBkpReg++);
+	print_log(out, " 4 : 0x%08lx\r\n", *rtcBkpReg++);
 }

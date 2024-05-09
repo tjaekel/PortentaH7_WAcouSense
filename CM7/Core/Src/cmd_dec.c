@@ -51,6 +51,7 @@ ECMD_DEC_Status CMD_print(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_fwreset(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_diag(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_debug(TCMD_DEC_Results *res, EResultOut out);
+ECMD_DEC_Status CMD_cr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_usr(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_usr2(TCMD_DEC_Results *res, EResultOut out);
 ECMD_DEC_Status CMD_var(TCMD_DEC_Results *res, EResultOut out);
@@ -204,6 +205,12 @@ const TCMD_DEC_Command Commands[] = {
 				.help = (const char *)"set or clear debug flags [value]",
 				.func = CMD_debug,
 				.manPage = 9,
+		},
+		{
+				.cmd = (const char *)"cr",
+				.help = (const char *)"print crash report",
+				.func = CMD_cr,
+				.manPage = 9,			/* update */
 		},
 		{
 				.cmd = (const char *)"dumpm",
@@ -1282,6 +1289,14 @@ ECMD_DEC_Status CMD_debug(TCMD_DEC_Results *res, EResultOut out)
 	return CMD_DEC_OK;
 }
 
+ECMD_DEC_Status CMD_cr(TCMD_DEC_Results *res, EResultOut out)
+{
+	(void)res;
+
+	SYSCFG_printCrashInfo(out);
+	return CMD_DEC_OK;
+}
+
 ECMD_DEC_Status CMD_dumpm(TCMD_DEC_Results *res, EResultOut out)
 {
 	hex_dump((uint8_t *)res->val[0], (uint16_t)res->val[1], (int)res->val[2], out);
@@ -1721,6 +1736,19 @@ ECMD_DEC_Status CMD_test(TCMD_DEC_Results *res, EResultOut out)
 			off++;
 		}
 	}
+#endif
+
+#if 1
+	//force a Hard Fault to check our "cr" command
+	unsigned long *addr = (unsigned long *)(0x08000000 + 0x02000000);
+	*addr = 0x11223344;					//write to invalid address
+#if 1
+	{
+		int i;
+		for (i = 0; i < 100; i++)
+			__NOP();					//the Hard Fault Handler comes here, delayed, imprecise!
+	}
+#endif
 #endif
 
 	return CMD_DEC_OK;

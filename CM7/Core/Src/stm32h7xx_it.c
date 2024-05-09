@@ -46,33 +46,29 @@ void NMI_Handler(void)
 /**
   * @brief This function handles Hard fault interrupt.
   */
-#if 0
-volatile unsigned int stacked_r0;
-volatile unsigned int stacked_r1;
-volatile unsigned int stacked_r2;
-volatile unsigned int stacked_r3;
-volatile unsigned int stacked_r12;
-volatile unsigned int stacked_lr;
-volatile unsigned int stacked_pc;
-volatile unsigned int stacked_psr;
-
-void __USED HardFault_Handler_C(unsigned int *hardfault_args)
+void __USED HardFault_Handler_C(unsigned long *hardfault_args)
 {
-		stacked_r0 	= ((unsigned long) hardfault_args[0]);
-		stacked_r1 	= ((unsigned long) hardfault_args[1]);
-		stacked_r2 	= ((unsigned long) hardfault_args[2]);
-		stacked_r3 	= ((unsigned long) hardfault_args[3]);
+	uint32_t *rtcBkpReg = (uint32_t *)&RTC_START_BKP_REG;
+	rtcBkpReg += 15;			//skip the syscfg
+	//stacked_r0 	= hardfault_args[0];
+	//stacked_r1 	= hardfault_args[1];
+	//stacked_r2 	= hardfault_args[2];
+	//stacked_r3 	= hardfault_args[3];
+	//stacked_r12 	= hardfault_args[4];
 
-		stacked_r12 = ((unsigned long) hardfault_args[4]);
-		stacked_lr 	= ((unsigned long) hardfault_args[5]);
-		stacked_pc 	= ((unsigned long) hardfault_args[6]);
-		stacked_psr = ((unsigned long) hardfault_args[7]);
+	*rtcBkpReg++ = hardfault_args[5];						//LR
+	*rtcBkpReg++ = hardfault_args[6];						//PC
+	*rtcBkpReg++ = hardfault_args[7];						//XPSR
+	*rtcBkpReg++ = *((unsigned long *)0xE000ED28);			//CFSR
+	*rtcBkpReg++ = *((unsigned long *)0xE000EFA8);			//ABFSR
+	//*rtcBkpReg = *((unsigned long *)0xE000ED2C);			//HFSR ?
 
-		while (1) {
-			__NOP();
-		}
+	////NVIC_SystemReset();
+
+	while (1) {
+		__NOP();
+	}
 }
-#endif
 
 /**
   * @brief This function handles Memory management fault.

@@ -58,15 +58,16 @@ typedef struct {
 	unsigned long			SPInoop;				//12: SPI noop code (for loopback)
 	unsigned long			ChipNo;					//13: SPI protocol, chip number
 	unsigned long			SysCfg;					//14: bit 0: = 1: heart beat LED off
-	unsigned long			res14;					//15
-	unsigned long			res15;					//16
-	unsigned long			res16;					//17
-	unsigned long			res17;					//18
-	unsigned long			res18;					//19: max. (20 registers in RTC)
+	//reserved for crash report:
+	//unsigned long			res14;					//15
+	//unsigned long			res15;					//16
+	//unsigned long			res16;					//17
+	//unsigned long			res17;					//18
+	//unsigned long			res18;					//19: max. (20 registers in RTC)
 } tCFGparams;
 
 #define RTC_START_BKP_REG	RTC->BKP11R
-#define RTC_NUM_BKP			20
+#define RTC_NUM_BKP			(20-5)					//5 for crash report
 
 //exported global variables
 extern unsigned long GDebug;
@@ -79,5 +80,6 @@ void SYSCFG_Default(void);
 void SYSCFG_setCfg(int idx, unsigned long val);
 unsigned long SYSCFG_getCfg(int idx);
 void SYSCFG_print(EResultOut out);
+void SYSCFG_printCrashInfo(EResultOut out);
 
 #endif /* INC_DEBUG_SYS_H_ */
